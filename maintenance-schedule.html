@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lexus Maintenance Schedule | Erin Park Lexus</title>
+<link rel="preload" href="fonts/Nordique.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face {
+  font-family: 'Nordique';
+  src: url('fonts/Nordique.woff2') format('woff2'),
+       url('fonts/Nordique.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  --ink: #111111;
+  --muted: #5E5E5E;
+  --soft: #4F4F4F;
+  --line: #E3E3E3;
+  --grey: #EFF0EF;
+  --hero: #1E1E1E;
+  --black: #000000;
+  --white: #FFFFFF;
+  --border: #BDBDBD;
+  --error: #9B1C1C;
+  --pill-h: 44px;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--white); }
+body {
+  font-family: 'Nordique', 'Lato', 'Helvetica Neue', Arial, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  overflow-anchor: none;
+}
+button, input { font-family: inherit; }
+a { color: var(--ink); }
+[hidden] { display: none !important; }
+
+.hero { background: var(--hero); color: var(--white); padding: clamp(36px, 6vw, 72px) clamp(16px, 4vw, 56px); }
+.wrap { max-width: 1200px; margin: 0 auto; }
+.hero h1 { margin: 0 0 14px; font-size: clamp(34px, 5vw, 60px); font-weight: normal; line-height: 1.05; }
+.hero p { margin: 0; font-size: 18px; line-height: 1.5; color: #F2F2F2; }
+.cta {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 48px; padding: 0 28px; margin-top: 28px;
+  background: var(--white); color: var(--black); text-decoration: none;
+  border-radius: 4px; font-size: 17px; text-transform: uppercase; letter-spacing: .01em;
+}
+.cta:hover { background: #E6E6E6; }
+
+main { max-width: 1200px; margin: 0 auto; padding: 48px clamp(16px, 4vw, 40px) 64px; display: flex; flex-direction: column; gap: 40px; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.finder { display: flex; flex-direction: column; gap: 28px; }
+h2 { margin: 0; font-size: 30px; font-weight: normal; }
+h3 { margin: 0; font-weight: normal; }
+.sub { margin: 0; font-size: 16px; color: var(--muted); }
+.step { font-size: 18px; }
+.step small { color: var(--muted); font-size: 15px; }
+
+.grid { display: grid; gap: 8px; }
+.g-year { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
+.g-model { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+.g-trim { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+
+/* Pills, hints and the error line share one fixed height so swapping them never nudges the page */
+.pill {
+  height: var(--pill-h); border-radius: 4px; font-size: 15px; cursor: pointer;
+  background: var(--white); color: var(--ink); border: 1px solid var(--border);
+  transition: background .15s, color .15s, border-color .15s;
+}
+.pill:hover { border-color: var(--ink); }
+.pill[aria-pressed="true"] { background: var(--black); color: var(--white); border-color: var(--black); }
+.hint {
+  display: flex; align-items: center; height: var(--pill-h); padding: 0 16px;
+  background: var(--grey); border-radius: 4px; font-size: 15px; color: var(--muted);
+}
+.error { min-height: 1.5em; line-height: 1.5; font-size: 15px; color: var(--error); }
+
+.pill:focus-visible, .btn:focus-visible, .tab:focus-visible, .cta:focus-visible { outline: 2px solid var(--black); outline-offset: 2px; }
+.cta:focus-visible { outline-color: var(--white); outline-offset: 3px; }
+
+.km-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.km-box { display: flex; align-items: center; height: 48px; border: 1px solid var(--border); border-radius: 4px; padding: 0 14px; gap: 8px; flex: 0 1 260px; background: var(--white); }
+.km-box:focus-within { border-color: var(--black); }
+.km-box input { border: none; outline: none; font-size: 17px; width: 100%; background: transparent; color: var(--ink); }
+.km-box span { color: var(--muted); font-size: 15px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 30px; background: var(--black); color: var(--white); border: none; border-radius: 4px; font-size: 17px; text-transform: uppercase; cursor: pointer; }
+.btn:hover { background: #2A2A2A; }
+
+.results { display: flex; flex-direction: column; gap: 28px; border-top: 1px solid var(--line); padding-top: 40px; }
+.v-title { font-size: 34px; font-weight: normal; margin: 0; }
+.v-trim { font-size: 17px; color: var(--muted); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.stat { display: flex; align-items: center; gap: 18px; padding: 22px; border: 1px solid var(--line); border-radius: 4px; }
+.stat .v { font-size: 24px; font-variant-numeric: tabular-nums; }
+.stat .l { font-size: 15px; color: var(--muted); }
+.tabs { display: flex; flex-wrap: wrap; gap: 10px; }
+.tab { height: 46px; padding: 0 28px; border-radius: 4px; font-size: 15px; cursor: pointer; background: var(--white); color: var(--ink); border: 1px solid var(--ink); }
+.tab[aria-selected="true"] { background: var(--black); color: var(--white); }
+
+.ms-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.ms { padding: 20px 22px; border-radius: 4px; display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--line); }
+.ms .b { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.ms .k { font-size: 28px; font-variant-numeric: tabular-nums; }
+.ms .n { font-size: 16px; }
+.ms.prev { background: var(--grey); border-color: var(--grey); }
+.ms.prev .b { color: var(--soft); }
+.ms.next { background: var(--black); color: var(--white); border-color: var(--black); }
+.ms.next .b { color: #D9D9D9; }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 32px; align-items: start; }
+.two > * { min-width: 0; }
+.check { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.check li { display: flex; gap: 14px; align-items: flex-start; padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 16px; line-height: 1.45; }
+.check svg { flex-shrink: 0; margin-top: 2px; }
+.special { padding: 16px 18px; background: var(--grey); border-radius: 4px; display: flex; flex-direction: column; gap: 4px; }
+.special .t { font-size: 16px; }
+.special .d { font-size: 14px; color: var(--soft); line-height: 1.45; }
+
+.table-box { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; }
+.table { min-width: 680px; }
+.tr { display: grid; grid-template-columns: 140px 160px minmax(0, 1fr); gap: 16px; padding: 13px 20px; border-top: 1px solid var(--line); align-items: center; font-size: 15px; }
+.tr.head { border-top: none; background: var(--grey); font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--soft); }
+.tr .km { font-size: 16px; font-variant-numeric: tabular-nums; }
+.tr.past { color: #767676; }
+.tr.now { background: var(--black); color: var(--white); }
+.inc { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+.tag { font-size: 12px; padding: 3px 8px; border: 1px solid currentColor; border-radius: 3px; }
+.note { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.6; border-top: 1px solid var(--line); padding-top: 18px; }
+</style>
+</head>
+<body>
+<div id="ep-root">
+
+<section class="hero">
+  <div class="wrap">
+    <h1>Maintenance Schedule</h1>
+    <p>Select your Lexus and enter its mileage to see which service it is due for.</p>
+    <a class="cta" href="https://erinpark-lexus.ca01.netdirector-test.link/book-a-service/" target="_top">Book A Service Appointment</a>
+  </div>
+</section>
+
+<main>
+  <section class="finder" aria-labelledby="find">
+    <div class="stack" style="gap:6px">
+      <h2 id="find">Find your service</h2>
+      <p class="sub">Lexus recommends a visit every 8,000 km or 6 months, whichever comes first.</p>
+    </div>
+
+    <div class="stack">
+      <div class="step" id="lbl-year">1. Model year</div>
+      <div class="grid g-year" id="years" role="group" aria-labelledby="lbl-year"></div>
+    </div>
+
+    <div class="stack">
+      <div class="step" id="lbl-model">2. Model</div>
+      <div class="grid g-model" id="models" role="group" aria-labelledby="lbl-model" hidden></div>
+      <div class="hint" id="models-hint">Choose a model year first.</div>
+    </div>
+
+    <div class="stack">
+      <div class="step" id="lbl-trim">3. Trim / package <small>(optional)</small></div>
+      <div class="grid g-trim" id="trims" role="group" aria-labelledby="lbl-trim" hidden></div>
+      <div class="hint" id="trims-hint">Choose a model to see its trims.</div>
+    </div>
+
+    <div class="stack">
+      <label class="step" for="km">4. Current mileage</label>
+      <div class="km-row">
+        <div class="km-box">
+          <input id="km" type="number" min="0" max="600000" step="1000" inputmode="numeric" placeholder="e.g. 48000">
+          <span>km</span>
+        </div>
+        <button class="btn" type="button" id="go">View Schedule</button>
+      </div>
+      <div class="error" id="err" role="alert" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="results" id="results" aria-labelledby="v-title" hidden>
+    <div class="stack" style="gap:4px">
+      <h2 class="v-title" id="v-title"></h2>
+      <div class="v-trim" id="v-trim"></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 12l4-3"></path><path d="M7 15h10"></path></svg>
+        <div><div class="v" id="s-km"></div><div class="l">Current odometer</div></div>
+      </div>
+      <div class="stat">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"></path></svg>
+        <div><div class="v" id="s-next"></div><div class="l">Next service</div></div>
+      </div>
+      <div class="stat">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16"></path><path d="M6 16l4-4 3 3 5-6"></path></svg>
+        <div><div class="v" id="s-due"></div><div class="l">Due at</div></div>
+      </div>
+      <div class="stat">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+        <div><div class="v" id="s-togo"></div><div class="l">Remaining (or 6 months)</div></div>
+      </div>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Schedule view">
+      <button class="tab" type="button" role="tab" id="tab-status" aria-selected="true" aria-controls="pane-status">Service Status</button>
+      <button class="tab" type="button" role="tab" id="tab-sched" aria-selected="false" aria-controls="pane-sched">Full Schedule</button>
+    </div>
+
+    <div id="pane-status" role="tabpanel" aria-labelledby="tab-status" class="stack" style="gap:32px">
+      <div class="ms-grid" id="milestones"></div>
+      <div class="two">
+        <div class="stack" style="gap:14px">
+          <h3 style="font-size:24px">What's included in your <span id="next-name"></span></h3>
+          <ul class="check" id="checklist"></ul>
+        </div>
+        <div class="stack" id="specials-wrap" hidden>
+          <h3 style="font-size:20px">Also due at your mileage</h3>
+          <div class="stack" id="specials"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="pane-sched" role="tabpanel" aria-labelledby="tab-sched" class="stack" style="gap:16px" hidden>
+      <p class="sub" style="color:var(--soft);line-height:1.5">The cycle repeats every 32,000 km: Service 1 at 8,000 km, Service 2 at 16,000 km, Service 1 at 24,000 km and Service 3 at 32,000 km.</p>
+      <div class="table-box">
+        <div class="table" id="table">
+          <div class="tr head"><div>Mileage</div><div>Service</div><div>Includes</div></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="note">Hybrid models follow the same schedule. Fully electric models (RZ, UX 300e) do not need engine oil changes; brake fluid, coolant and 12V battery service still apply. Severe driving conditions may shorten intervals. Your Erin Park Lexus service advisor can confirm the exact requirements for your vehicle.</p>
+  </section>
+</main>
+
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const MODELS = {
+    ES: { years: [2001, 2026], trims: { '2001-2006': ['ES 300', 'ES 330'], '2007-2018': ['ES 300h', 'ES 350'], '2019-2026': ['ES 250', 'ES 300h', 'ES 350', 'ES 350 F Sport'] } },
+    GS: { years: [2001, 2020], trims: { '2001-2005': ['GS 300', 'GS 430'], '2006-2011': ['GS 300', 'GS 350', 'GS 430', 'GS 460'], '2012-2020': ['GS 200t', 'GS 300h', 'GS 350', 'GS 450h', 'GS F'] } },
+    IS: { years: [2001, 2026], trims: { '2001-2005': ['IS 300'], '2006-2013': ['IS 250', 'IS 350', 'IS F'], '2014-2020': ['IS 200t', 'IS 250', 'IS 300', 'IS 300 AWD', 'IS 350', 'IS 350 AWD'], '2021-2026': ['IS 300', 'IS 300 AWD', 'IS 350', 'IS 350 AWD', 'IS 500'] } },
+    LS: { years: [2001, 2026], trims: { '2001-2006': ['LS 430'], '2007-2012': ['LS 460', 'LS 600h L'], '2013-2017': ['LS 460', 'LS 460 L', 'LS 600h L'], '2018-2026': ['LS 500', 'LS 500 AWD', 'LS 500h', 'LS 500h AWD'] } },
+    LC: { years: [2018, 2026], trims: { '2018-2026': ['LC 500', 'LC 500 Convertible', 'LC 500h'] } },
+    LFA: { years: [2011, 2012], trims: { '2011-2012': ['LFA'] } },
+    RC: { years: [2015, 2026], trims: { '2015-2026': ['RC 200t', 'RC 300', 'RC 300 AWD', 'RC 350', 'RC 350 AWD', 'RC F', 'RC F Track Edition'] } },
+    SC: { years: [2001, 2010], trims: { '2001-2010': ['SC 430'] } },
+    CT: { years: [2011, 2017], trims: { '2011-2017': ['CT 200h'] } },
+    UX: { years: [2019, 2026], trims: { '2019-2026': ['UX 200', 'UX 250h', 'UX 250h AWD', 'UX 300e'] } },
+    NX: { years: [2015, 2026], trims: { '2015-2021': ['NX 200t', 'NX 300', 'NX 300 AWD', 'NX 300h', 'NX 300h AWD'], '2022-2026': ['NX 250', 'NX 350', 'NX 350h', 'NX 350h AWD', 'NX 450h+'] } },
+    RX: { years: [2001, 2026], trims: { '2001-2003': ['RX 300'], '2004-2009': ['RX 330', 'RX 350', 'RX 400h'], '2010-2015': ['RX 350', 'RX 350 AWD', 'RX 450h'], '2016-2022': ['RX 350', 'RX 350 AWD', 'RX 350L', 'RX 450h', 'RX 450h AWD', 'RX 450hL'], '2023-2026': ['RX 350', 'RX 350 AWD', 'RX 350h', 'RX 350h AWD', 'RX 450h+', 'RX 500h'] } },
+    GX: { years: [2003, 2026], trims: { '2003-2009': ['GX 470'], '2010-2023': ['GX 460'], '2024-2026': ['GX 550', 'GX 550 Overtrail+', 'GX 550 Premium Plus'] } },
+    LX: { years: [2001, 2026], trims: { '2001-2007': ['LX 470'], '2008-2021': ['LX 570'], '2022-2026': ['LX 600', 'LX 600 F Sport', 'LX 600 Ultra Luxury'] } },
+    TX: { years: [2024, 2026], trims: { '2024-2026': ['TX 350', 'TX 350 AWD', 'TX 500h', 'TX 500h AWD'] } },
+    RZ: { years: [2023, 2026], trims: { '2023-2026': ['RZ 300e', 'RZ 450e', 'RZ 450e Direct4'] } },
+  };
+
+  const LABEL = { ci1: '1,600 km Check-in', s1: 'Service 1', s2: 'Service 2', s3: 'Service 3' };
+  const SUMMARY = {
+    ci1: 'Walk-around, vehicle settings set-up, visual inspection',
+    s1: 'Tire rotation, brake inspection, fluid levels, air filters',
+    s2: 'Oil & filter change, drive belts, full fluid check, tire rotation',
+    s3: 'Oil change, full brake service, battery, steering, suspension, fuel & exhaust',
+  };
+
+  const S1 = [
+    'Reset maintenance reminder light / system',
+    "Check driver's floor mat installation",
+    'Inspect wiper blades, linkage and washers for proper operation',
+    'Inspect and adjust engine oil, brake fluid, coolant, power steering and washer fluid levels',
+    'Remove and inspect engine air filter',
+    'Remove and inspect cabin air filter',
+    'Check and record tire tread depth; inspect for damage and uneven wear',
+    'Remove wheels and visually inspect brake pads, calipers, rotors, lines and hoses',
+    'Rotate tires (same-size front and rear) or perform seasonal changeover',
+    'Record inspection results on repair order',
+  ];
+  const S2 = [
+    'Reset maintenance reminder light / system',
+    "Check driver's floor mat installation",
+    'Inspect all lights and horn for proper operation',
+    'Inspect wiper blades, linkage and washers for proper operation',
+    'Visually inspect drive belts',
+    'Replace engine oil and filter (full synthetic)',
+    'Lubricate locks, latches and hinges',
+    'Inspect and adjust all fluid levels: oil, brake, coolant, power steering, transmission, differential, washer',
+    'Remove and inspect engine air filter',
+    'Remove and inspect cabin air filter',
+    'Remove wheels and visually inspect brake pads, calipers, rotors, lines and hoses',
+    'Check and record tire tread depth; inspect for damage and uneven wear',
+    'Rotate tires (same-size front and rear) or perform seasonal changeover',
+    'Inspect differential and transfer case vents for obstruction',
+    'Record inspection results on repair order',
+  ];
+  const S3 = [
+    ...S2.slice(0, 14),
+    'Remove brake calipers/drums; inspect and measure rotors, drums, pads and shoes',
+    'Perform 12V battery service and electrical charging system evaluation',
+    'Inspect valve clearance (audibly)',
+    'Check steering gear, linkage and shock absorbers for looseness, damage or leakage',
+    'Inspect ball joints, dust covers, driveshafts, chassis nuts and bolts',
+    'Inspect fuel system for leaks or damage: tank band, cap gasket, vapour vent hoses, lines and connections',
+    'Inspect engine oil cooler and transmission cooler lines for leakage or damage',
+    'Inspect exhaust system for leaks, damage or broken hangers',
+    'Record inspection results on repair order',
+  ];
+  const CI1 = [
+    'Vehicle walk-around with an Academy Trained Technician and service advisor',
+    'Set up personal vehicle settings and Lexus connected services',
+    'Under-the-hood visual inspection',
+    "Check driver's floor mat installation",
+  ];
+  const ITEMS = { ci1: CI1, s1: S1, s2: S2, s3: S3 };
+
+  const CHECK_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>';
+
+  const state = { year: null, model: null, trim: null, tab: 'status' };
+
+  const byId = (id) => document.getElementById(id);
+  const root = byId('ep-root');
+  const yearsEl = byId('years');
+  const modelsEl = byId('models');
+  const modelsHint = byId('models-hint');
+  const trimsEl = byId('trims');
+  const trimsHint = byId('trims-hint');
+  const kmInput = byId('km');
+  const errEl = byId('err');
+  const resultsEl = byId('results');
+  const tabStatus = byId('tab-status');
+  const tabSched = byId('tab-sched');
+  const paneStatus = byId('pane-status');
+  const paneSched = byId('pane-sched');
+
+  /* ---------- Height reporting for the surrounding iframe ---------- */
+  const emitHeight = () => {
+    const height = Math.ceil(root.getBoundingClientRect().height);
+    window.top.postMessage({ type: 'epHeight', height }, '*');
+  };
+
+  /* ---------- Schedule logic ---------- */
+  const serviceType = (km) => {
+    if (km === 1600) return 'ci1';
+    const pos = km % 32000;
+    if (pos === 8000 || pos === 24000) return 's1';
+    if (pos === 16000) return 's2';
+    return 's3';
+  };
+
+  const buildSchedule = (maxKm) => {
+    const points = [{ km: 1600, type: 'ci1' }];
+    for (let km = 8000; km <= maxKm; km += 8000) points.push({ km, type: serviceType(km) });
+    return points;
+  };
+
+  const formatKm = (n) => `${n.toLocaleString('en-CA')} km`;
+
+  const trimsFor = (model, year) => {
+    const match = Object.entries(MODELS[model].trims).find(([range]) => {
+      const [start, end] = range.split('-').map(Number);
+      return year >= start && year <= end;
+    });
+    return match ? match[1] : [];
+  };
+
+  const specialsFor = (km) => [
+    km >= 48000 && ['Brake fluid replacement', 'Recommended every 2 years or approximately 48,000 km.'],
+    km >= 80000 && ['Engine coolant replacement', 'First replacement near 80,000 km, then every 48,000 km.'],
+    km >= 80000 && ['Automatic transmission fluid', 'Replace approximately every 80,000 km or as indicated by condition.'],
+    km >= 100000 && ['Spark plug replacement', 'Replace iridium spark plugs at or near 100,000 km (gas and hybrid models).'],
+    km >= 100000 && ['Accessory drive belt replacement', 'Replace near 100,000 km or when wear is found.'],
+  ].filter(Boolean);
+
+  /* ---------- DOM helpers ---------- */
+  const el = (tag, className, text) => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = text;
+    return node;
+  };
+
+  const pill = (label, pressed, onClick) => {
+    const button = el('button', 'pill', label);
+    button.type = 'button';
+    button.setAttribute('aria-pressed', String(pressed));
+    button.addEventListener('click', onClick);
+    return button;
+  };
+
+  const setError = (message) => { errEl.textContent = message; };
+
+  /* ---------- Rendering ---------- */
+  const renderYears = () => {
+    const buttons = [];
+    for (let year = 2026; year >= 2001; year -= 1) {
+      buttons.push(pill(String(year), state.year === year, () => {
+        Object.assign(state, { year, model: null, trim: null });
+        setError('');
+        resultsEl.hidden = true;
+        renderSelectors();
+      }));
+    }
+    yearsEl.replaceChildren(...buttons);
+  };
+
+  const renderModels = () => {
+    const hasYear = state.year !== null;
+    modelsEl.hidden = !hasYear;
+    modelsHint.hidden = hasYear;
+    if (!hasYear) { modelsEl.replaceChildren(); return; }
+    const buttons = Object.keys(MODELS)
+      .sort()
+      .filter((model) => {
+        const [start, end] = MODELS[model].years;
+        return state.year >= start && state.year <= end;
+      })
+      .map((model) => pill(`Lexus ${model}`, state.model === model, () => {
+        Object.assign(state, { model, trim: null });
+        setError('');
+        resultsEl.hidden = true;
+        renderSelectors();
+      }));
+    modelsEl.replaceChildren(...buttons);
+  };
+
+  const renderTrims = () => {
+    const hasModel = state.model !== null;
+    trimsEl.hidden = !hasModel;
+    trimsHint.hidden = hasModel;
+    if (!hasModel) { trimsEl.replaceChildren(); return; }
+    const buttons = trimsFor(state.model, state.year).map((trim) => pill(trim, state.trim === trim, () => {
+      state.trim = state.trim === trim ? null : trim;
+      renderTrims();
+      if (!resultsEl.hidden) calculate();
+    }));
+    trimsEl.replaceChildren(...buttons);
+  };
+
+  const renderSelectors = () => {
+    renderYears();
+    renderModels();
+    renderTrims();
+  };
+
+  const setTab = (tab) => {
+    state.tab = tab;
+    tabStatus.setAttribute('aria-selected', String(tab === 'status'));
+    tabSched.setAttribute('aria-selected', String(tab === 'sched'));
+    paneStatus.hidden = tab !== 'status';
+    paneSched.hidden = tab !== 'sched';
+  };
+
+  const calculate = () => {
+    const raw = kmInput.value.trim();
+    const km = Number.parseInt(raw, 10);
+    if (state.year === null || state.model === null) return setError('Please choose a model year and a model.');
+    if (raw === '' || Number.isNaN(km) || km < 0) return setError('Please enter your current mileage in km.');
+    setError('');
+
+    const points = buildSchedule(Math.max(km + 40000, 160000));
+    const past = points.filter((p) => p.km <= km);
+    const future = points.filter((p) => p.km > km);
+    const prev = past.at(-1) ?? null;
+    const next = future[0];
+
+    byId('v-title').textContent = `${state.year} Lexus ${state.model}`;
+    byId('v-trim').textContent = state.trim ?? 'All trims';
+    byId('s-km').textContent = formatKm(km);
+    byId('s-next').textContent = LABEL[next.type];
+    byId('s-due').textContent = formatKm(next.km);
+    byId('s-togo').textContent = formatKm(next.km - km);
+    byId('next-name').textContent = LABEL[next.type];
+
+    const milestone = (variant, badge, point) => {
+      const card = el('div', `ms ${variant}`.trim());
+      card.append(el('div', 'b', badge), el('div', 'k', formatKm(point.km)), el('div', 'n', LABEL[point.type]));
+      return card;
+    };
+    const cards = [];
+    if (prev) cards.push(milestone('prev', 'Previous milestone', prev));
+    cards.push(milestone('next', 'Due next', next));
+    future.slice(1, prev ? 3 : 4).forEach((p) => cards.push(milestone('', 'Upcoming', p)));
+    byId('milestones').replaceChildren(...cards);
+
+    byId('checklist').replaceChildren(...ITEMS[next.type].map((text) => {
+      const li = el('li');
+      li.innerHTML = CHECK_ICON;
+      li.append(el('span', null, text));
+      return li;
+    }));
+
+    const specials = specialsFor(km);
+    byId('specials-wrap').hidden = specials.length === 0;
+    byId('specials').replaceChildren(...specials.map(([title, desc]) => {
+      const box = el('div', 'special');
+      box.append(el('div', 't', title), el('div', 'd', desc));
+      return box;
+    }));
+
+    const table = byId('table');
+    const header = table.firstElementChild;
+    const rows = points.map((p) => {
+      const rowClass = p.km === next.km ? 'tr now' : (p.km <= km ? 'tr past' : 'tr');
+      const row = el('div', rowClass);
+      const includes = el('div', 'inc');
+      includes.append(el('span', null, SUMMARY[p.type]));
+      if (p.km % 48000 === 0) includes.append(el('span', 'tag', 'Brake fluid'));
+      if (p.km % 80000 === 0) includes.append(el('span', 'tag', 'Coolant & trans. fluid'));
+      if (p.km >= 100000 && p.km % 96000 === 0) includes.append(el('span', 'tag', 'Spark plugs'));
+      row.append(el('div', 'km', formatKm(p.km)), el('div', null, LABEL[p.type]), includes);
+      return row;
+    });
+    table.replaceChildren(header, ...rows);
+
+    resultsEl.hidden = false;
+    setTab(state.tab);
+  };
+
+  /* ---------- Events ---------- */
+  byId('go').addEventListener('click', calculate);
+  tabStatus.addEventListener('click', () => setTab('status'));
+  tabSched.addEventListener('click', () => setTab('sched'));
+  kmInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      calculate();
+      emitHeight();
+    }
+  });
+
+  /* Every button click reports the new content height (runs after the button's own handler) */
+  document.addEventListener('click', (event) => {
+    if (event.target.closest('button')) emitHeight();
+  });
+
+  renderSelectors();
+  window.addEventListener('load', emitHeight);
+  document.fonts?.ready.then(emitHeight);
+})();
+</script>
+</body>
+</html>
